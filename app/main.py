@@ -57,6 +57,7 @@ def post_task(
         request, "partials/_task_list.html", _list_context(request, session)
     )
 
+
 # Think of it as 'completing' a task. But we can also 'uncomplete' it. So it's a toggle.
 @app.post("/tasks/{task_id}/toggle")
 def toggle(request: Request, session: SessionDep, task_id: int):

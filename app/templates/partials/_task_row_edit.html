@@ -12,6 +12,7 @@
   </td>
   <td>
     <button
+      class="btn-add btn-sm"
       hx-put="/tasks/{{ task.id }}"
       hx-include="closest tr"
       hx-target="#task-list"
@@ -19,7 +20,7 @@
     >
       Save
     </button>
-    <button hx-get="/tasks" hx-target="#task-list" hx-swap="innerHTML">
+    <button class="btn-sm" hx-get="/tasks" hx-target="#task-list" hx-swap="innerHTML">
       Cancel
     </button>
   </td>
