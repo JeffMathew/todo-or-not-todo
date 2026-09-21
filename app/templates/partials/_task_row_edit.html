@@ -1,0 +1,26 @@
+<tr>
+  <td></td>
+  <td><input type="text" name="title" value="{{ task.title }}" required /></td>
+  <td><input type="date" name="due_date" value="{{ task.due_date or '' }}" /></td>
+  <td>
+    <select name="priority">
+      <option value="">Priority</option>
+      <option value="low" {% if task.priority and task.priority.value == "low" %}selected{% endif %}>Low</option>
+      <option value="medium" {% if task.priority and task.priority.value == "medium" %}selected{% endif %}>Medium</option>
+      <option value="high" {% if task.priority and task.priority.value == "high" %}selected{% endif %}>High</option>
+    </select>
+  </td>
+  <td>
+    <button
+      hx-put="/tasks/{{ task.id }}"
+      hx-include="closest tr"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+    >
+      Save
+    </button>
+    <button hx-get="/tasks" hx-target="#task-list" hx-swap="innerHTML">
+      Cancel
+    </button>
+  </td>
+</tr>
