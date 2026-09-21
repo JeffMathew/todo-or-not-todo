@@ -1,0 +1,24 @@
+{% if error %}
+<p style="color: var(--pico-del-color);">{{ error }}</p>
+{% elif proposals %}
+<form hx-post="/ai/proposals/confirm" hx-target="#app-body" hx-swap="innerHTML">
+  <input type="hidden" name="count" value="{{ proposals|length }}" />
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Title</th>
+        <th>Due</th>
+        <th>Priority</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in proposals %}
+        {% set idx = loop.index0 %}
+        {% include "partials/_ai_proposal_row.html" %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="submit" class="btn-add">Confirm</button>
+</form>
+{% endif %}

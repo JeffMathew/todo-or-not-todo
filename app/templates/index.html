@@ -1,20 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>To-Do or Not To-Do</h1>
-{% include "partials/_task_form.html" %}
-<table>
-  <thead>
-    <tr>
-      <th></th>
-      <th>Title</th>
-      <th>Due</th>
-      <th>Priority</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody id="task-list">
-    {% include "partials/_task_list.html" %}
-  </tbody>
-</table>
+<div id="app-body">
+  {% include "partials/_app_body.html" %}
+</div>
 {% endblock %}
