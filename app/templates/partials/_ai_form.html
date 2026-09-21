@@ -1,0 +1,11 @@
+<form hx-post="/ai/proposals" hx-target="#ai-review" hx-swap="innerHTML">
+  <label for="ai-text">Paste a note and we'll propose tasks from it</label>
+  <textarea
+    id="ai-text"
+    name="text"
+    rows="3"
+    placeholder="e.g. Call the dentist tomorrow, urgent - fix the leaking tap by Friday"
+    required
+  ></textarea>
+  <button type="submit">Extract tasks</button>
+</form>

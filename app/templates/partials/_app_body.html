@@ -1,0 +1,22 @@
+<h1>To-Do or Not To-Do</h1>
+
+{% include "partials/_ai_form.html" %}
+<div id="ai-review">
+  {% include "partials/_ai_review.html" %}
+</div>
+
+{% include "partials/_task_form.html" %}
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Title</th>
+      <th>Due</th>
+      <th>Priority</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="task-list">
+    {% include "partials/_task_list.html" %}
+  </tbody>
+</table>

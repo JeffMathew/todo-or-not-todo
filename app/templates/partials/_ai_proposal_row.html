@@ -1,0 +1,34 @@
+<tr>
+  <td>
+    <input type="checkbox" name="included_{{ idx }}" value="1" checked />
+  </td>
+  <td>
+    <input
+      type="text"
+      name="title_{{ idx }}"
+      value="{{ p.title }}"
+      required
+    />
+  </td>
+  <td>
+    <input
+      type="date"
+      name="due_date_{{ idx }}"
+      value="{{ p.due_date or '' }}"
+    />
+  </td>
+  <td>
+    <select name="priority_{{ idx }}">
+      <option value="">Priority</option>
+      <option value="low" {% if p.priority and p.priority.value == "low" %}selected{% endif %}>
+        Low
+      </option>
+      <option value="medium" {% if p.priority and p.priority.value == "medium" %}selected{% endif %}>
+        Medium
+      </option>
+      <option value="high" {% if p.priority and p.priority.value == "high" %}selected{% endif %}>
+        High
+      </option>
+    </select>
+  </td>
+</tr>
