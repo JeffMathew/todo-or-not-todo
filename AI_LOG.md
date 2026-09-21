@@ -1,1 +1,3 @@
 # AI Log
+1. Pushed back to ensure creation of separate vendor/model agnostic `structured_output.py` and `tool_calling.py` scripts, so we can add other AI features easily in the future.
+2. Date extraction from figures of speech such as "next Monday" wasn't great, turns out LLMs are not always great at calendar arithmetic. Adjusted system prompt to be more explicit but still generic about calendar math.
