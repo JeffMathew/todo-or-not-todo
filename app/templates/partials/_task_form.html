@@ -1,0 +1,18 @@
+<form
+  hx-post="/tasks"
+  hx-target="#task-list"
+  hx-swap="innerHTML"
+  hx-on::after-request="this.reset()"
+>
+  <fieldset role="group">
+    <input type="text" name="title" placeholder="Task title" required />
+    <input type="date" name="due_date" />
+    <select name="priority">
+      <option value="">Priority</option>
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+    <button type="submit" class="btn-add">Add</button>
+  </fieldset>
+</form>

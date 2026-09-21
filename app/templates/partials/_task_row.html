@@ -1,0 +1,34 @@
+<tr>
+  <td>
+    <input
+      type="checkbox"
+      class="{% if task.completed %}checkbox-done{% endif %}"
+      {% if task.completed %}checked{% endif %}
+      hx-post="/tasks/{{ task.id }}/toggle"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+    />
+  </td>
+  <td>{% if task.completed %}<s class="task-title-done">{{ task.title }}</s>{% else %}{{ task.title }}{% endif %}</td>
+  <td>{{ task.due_date or "" }}</td>
+  <td>{{ task.priority.value if task.priority else "" }}</td>
+  <td>
+    <button
+      class="btn-edit btn-sm"
+      hx-get="/tasks/{{ task.id }}/edit"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+    >
+      Edit
+    </button>
+    <button
+      class="btn-delete btn-sm"
+      hx-delete="/tasks/{{ task.id }}"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+      hx-confirm="Delete this task?"
+    >
+      Delete
+    </button>
+  </td>
+</tr>

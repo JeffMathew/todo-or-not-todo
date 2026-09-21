@@ -1,0 +1,12 @@
+{% if not tasks %}
+<tr>
+  <td colspan="5">No tasks yet — add one above.</td>
+</tr>
+{% endif %}
+{% for task in tasks %}
+  {% if task.id == editing_id %}
+    {% include "partials/_task_row_edit.html" %}
+  {% else %}
+    {% include "partials/_task_row.html" %}
+  {% endif %}
+{% endfor %}
