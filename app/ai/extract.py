@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from app.ai.schemas import ExtractedTask, ExtractionResult
 from app.ai.structured_output import StructuredOutputError, get_structured_output
@@ -44,13 +44,30 @@ class ExtractionError(Exception):
     pass
 
 
+def _next_weekday_reference(today: date) -> str:
+    # One full week (7 days) is not an arbitrary window - it's exactly
+    # enough to cover every "next <weekday>" phrase once, with no gaps or
+    # redundancy, regardless of what today's weekday is.
+    return "\n".join(
+        f"next {(today + timedelta(days=offset)).strftime('%A')}: "
+        f"{(today + timedelta(days=offset)).isoformat()}"
+        for offset in range(1, 8)
+    )
+
+
 def _system_prompt(today: date) -> str:
+    weekday = today.strftime("%A")
+    reference = _next_weekday_reference(today)
     return (
         "You are a task-extraction assistant for a to-do app. Read the "
         "user's freeform note and identify each discrete, actionable task "
         "mentioned in it. For each task, write a short, concrete, "
         "imperative-style title (e.g. 'Call the dentist', not 'I need to "
-        f"call the dentist'). Today's date is {today.isoformat()}. If the "
+        f"call the dentist'). Today is {weekday}, {today.isoformat()}. Use "
+        f"this table for any 'next <weekday>' reference - do not calculate "
+        f"weekdays yourself:\n{reference}\n\nFor other relative dates (e.g. "
+        "'in N days', 'in N weeks', 'by the Nth'), compute the date with "
+        "simple arithmetic from today's date above. If the "
         "text states or implies a due date (e.g. 'tomorrow', 'next "
         "Friday', 'in two weeks', 'by the 5th'), resolve it to an absolute "
         "date relative to today and include it as due_date in YYYY-MM-DD "
