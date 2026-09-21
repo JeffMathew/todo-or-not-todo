@@ -22,6 +22,14 @@
         font-size: 0.8rem;
         padding: 0.6rem 0.8rem;
       }
+      /* Matches Pico's own [role=group] selector shape (input:not(...) /
+         select) so specificity ties rather than losing outright - this
+         stylesheet loads after Pico's, so the tie resolves in our favor. */
+      [role="group"] input.field-wide { flex: 3 1 0; }
+      [role="group"] input.field-narrow,
+      [role="group"] select.field-narrow { flex: 1 1 0; }
+      h1 { text-align: center; }
+      .card-gap { margin-bottom: calc(var(--pico-block-spacing-vertical) * 3); }
     </style>
   </head>
   <body>

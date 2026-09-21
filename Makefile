@@ -1,4 +1,4 @@
-.PHONY: test lint clean run
+.PHONY: test lint clean run lock install
 
 test:
 	uv run pytest
@@ -14,3 +14,9 @@ clean:
 
 run:
 	uv run uvicorn app.main:app --reload
+
+lock:
+	uv lock
+
+install:
+	uv sync --frozen
