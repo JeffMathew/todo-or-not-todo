@@ -5,9 +5,15 @@
   hx-on::after-request="this.reset()"
 >
   <fieldset role="group">
-    <input type="text" name="title" placeholder="Task title" required />
-    <input type="date" name="due_date" />
-    <select name="priority">
+    <input
+      type="text"
+      name="title"
+      placeholder="Task title"
+      class="field-wide"
+      required
+    />
+    <input type="date" name="due_date" class="field-narrow" />
+    <select name="priority" class="field-narrow">
       <option value="">Priority</option>
       <option value="low">Low</option>
       <option value="medium">Medium</option>
