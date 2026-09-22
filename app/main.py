@@ -27,6 +27,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Create tables on startup."""
     create_db_and_tables()
     yield
 
@@ -41,6 +42,9 @@ def _page_context(
     proposals: list[ExtractedTask] | None = None,
     error: str | None = None,
 ) -> dict:
+    """Context shared by every template response: the current task list,
+    plus whichever row is being edited and/or AI-review state, if any.
+    """
     return {
         "request": request,
         "tasks": list_tasks(session),
@@ -52,6 +56,7 @@ def _page_context(
 
 @app.get("/")
 def index(request: Request, session: SessionDep):
+    """Full page load."""
     return templates.TemplateResponse(
         request, "index.html", _page_context(request, session)
     )
@@ -59,6 +64,7 @@ def index(request: Request, session: SessionDep):
 
 @app.get("/tasks")
 def get_tasks(request: Request, session: SessionDep):
+    """Re-render the task list with no row in edit mode - used by "Cancel"."""
     return templates.TemplateResponse(
         request, "partials/_task_list.html", _page_context(request, session)
     )
@@ -68,6 +74,7 @@ def get_tasks(request: Request, session: SessionDep):
 def post_task(
     request: Request, session: SessionDep, data: Annotated[TaskCreate, Form()]
 ):
+    """Create a task from the manual-add form."""
     create_task(session, data)
     return templates.TemplateResponse(
         request, "partials/_task_list.html", _page_context(request, session)
@@ -77,6 +84,7 @@ def post_task(
 # Think of it as 'completing' a task. But we can also 'uncomplete' it. So it's a toggle.
 @app.post("/tasks/{task_id}/toggle")
 def toggle(request: Request, session: SessionDep, task_id: int):
+    """Flip a task between complete and incomplete."""
     if toggle_task(session, task_id) is None:
         raise HTTPException(status_code=404)
     return templates.TemplateResponse(
@@ -86,6 +94,7 @@ def toggle(request: Request, session: SessionDep, task_id: int):
 
 @app.get("/tasks/{task_id}/edit")
 def edit_task(request: Request, session: SessionDep, task_id: int):
+    """Enter edit mode for one row."""
     if get_task(session, task_id) is None:
         raise HTTPException(status_code=404)
     return templates.TemplateResponse(
@@ -102,6 +111,7 @@ def put_task(
     task_id: int,
     data: Annotated[TaskUpdate, Form()],
 ):
+    """Save edits to a task."""
     if update_task(session, task_id, data) is None:
         raise HTTPException(status_code=404)
     return templates.TemplateResponse(
@@ -111,6 +121,7 @@ def put_task(
 
 @app.delete("/tasks/{task_id}")
 def remove_task(request: Request, session: SessionDep, task_id: int):
+    """Delete a task."""
     if not delete_task(session, task_id):
         raise HTTPException(status_code=404)
     return templates.TemplateResponse(
@@ -125,6 +136,12 @@ def create_proposals(
     client: LLMClientDep,
     text: Annotated[str, Form(min_length=1)],
 ):
+    """Ask the LLM to propose tasks from freeform text.
+
+    Renders the editable review UI on success, or an inline error (still
+    HTTP 200 - a valid partial showing "extraction failed" isn't a
+    framework validation failure).
+    """
     proposals: list[ExtractedTask] | None
     try:
         proposals = extract_tasks(client, text, today=date.today())
@@ -140,12 +157,24 @@ def create_proposals(
 
 
 def _form_str(form: FormData, key: str) -> str:
+    """Read a form field as plain text, defaulting to "".
+
+    Form values are typed as str | UploadFile; this rules out the
+    UploadFile case, since nothing here ever submits a file.
+    """
     value = form.get(key, "")
     return value if isinstance(value, str) else ""
 
 
 @app.post("/ai/proposals/confirm")
 async def confirm_proposals(request: Request, session: SessionDep):
+    """Save whichever proposed tasks are still checked; discard the rest.
+
+    Proposal rows arrive as indexed form fields (title_0, due_date_0, ...)
+    rather than FastAPI's usual Annotated[Model, Form()] binding, since that
+    doesn't support a variable-length list of rows. Resets the review panel
+    either way - nothing stays "pending".
+    """
     form = await request.form()
     count = int(_form_str(form, "count") or 0)
     for i in range(count):

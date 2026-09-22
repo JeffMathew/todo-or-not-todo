@@ -2,7 +2,7 @@
 
 A small to-do app with one genuine AI feature: paste a freeform note, an LLM
 proposes structured tasks (title, due date, priority), you review/edit/
-deselect them in the UI, and only confirmed tasks get saved.
+deselect them in the UI.
 
 ## Stack
 
