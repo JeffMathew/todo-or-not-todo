@@ -8,10 +8,16 @@ from app.config import settings
 
 
 class LLMClientError(Exception):
-    pass
+    """Raised when the underlying LLM call fails or returns something unusable."""
 
 
 class LLMClient(Protocol):
+    """Minimal interface: force a named tool call, get back its raw input dict.
+
+    Implement this against a different provider's API to plug it in - see
+    README.md's "Extending LLMClient for other providers" section.
+    """
+
     def call_tool(
         self,
         *,
@@ -20,10 +26,19 @@ class LLMClient(Protocol):
         tool_name: str,
         tool_description: str,
         tool_schema: dict[str, Any],
-    ) -> dict[str, Any]: ...
+    ) -> dict[str, Any]:
+        """Force the model to call tool_name and return its raw input dict."""
+        ...
 
 
 class BedrockLLMClient:
+    """Calls AWS Bedrock's Converse API with forced tool use.
+
+    Works unchanged with any model Bedrock hosts, since Converse normalizes
+    every vendor's response into the same shape - that's what lets this one
+    class serve both Anthropic and OpenAI models without provider-specific code.
+    """
+
     def __init__(self, model_id: str | None, region: str | None) -> None:
         if not model_id or not region:
             raise LLMClientError(
@@ -41,6 +56,7 @@ class BedrockLLMClient:
         tool_description: str,
         tool_schema: dict[str, Any],
     ) -> dict[str, Any]:
+        """Call Bedrock's Converse API and return the tool call's input dict."""
         try:
             response = self._client.converse(
                 modelId=self._model_id,
@@ -70,6 +86,7 @@ class BedrockLLMClient:
 
 
 def get_llm_client() -> LLMClient:
+    """FastAPI dependency: build a BedrockLLMClient from the configured model/region."""
     return BedrockLLMClient(settings.bedrock_model_id, settings.aws_region)
 
 

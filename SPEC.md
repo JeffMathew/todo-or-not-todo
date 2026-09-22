@@ -85,3 +85,17 @@ Build a live extension, we will add a feature during the interview
 - Rate limiting, request throttling
 - LLM cost tracking, observability, or prompt-tuning UI
 - Mobile app / responsive-design guarantees beyond what Pico CSS gives for free
+
+## 4. Future ideas (not scoped, not committed)
+
+Calendar view stays undecided per §2 - possibly a live/rehearsed extension
+exercise rather than pre-built. Two additional AI features discussed and
+deferred until after Slice 4 wrap-up, both reusing the existing
+`tool_calling.py`/`structured_output.py` layer from the extraction feature:
+
+- Duplicate/similar-task detection on create (manual or AI) - flag likely
+  duplicates against existing incomplete tasks before saving.
+- "What should I work on next?" - suggest one task from the current
+  incomplete list with a one-line reason, given title/due_date/priority as
+  context (not freeform text parsing, unlike extraction - a different shape
+  of structured-output problem, better reusability demonstration).

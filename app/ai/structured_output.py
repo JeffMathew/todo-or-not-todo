@@ -4,7 +4,7 @@ from app.ai.tool_calling import LLMClient, LLMClientError
 
 
 class StructuredOutputError(Exception):
-    pass
+    """Raised when the LLM call fails, or its output doesn't validate."""
 
 
 def get_structured_output[T: BaseModel](
@@ -17,6 +17,7 @@ def get_structured_output[T: BaseModel](
     system_prompt: str,
     user_message: str,
 ) -> T:
+    """Force a tool call and validate its result into output_model."""
     try:
         raw = client.call_tool(
             system_prompt=system_prompt,

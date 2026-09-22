@@ -1,3 +1,7 @@
+"""Shared fixtures: an isolated in-memory DB session and a fake LLM client,
+so tests never touch the real database or make network calls.
+"""
+
 from collections.abc import Generator
 from typing import Any
 
@@ -22,6 +26,7 @@ class FakeLLMClient:
         self.last_call: dict[str, Any] | None = None
 
     def call_tool(self, **kwargs: Any) -> dict:
+        """Record the call and return the canned response, or raise error."""
         self.last_call = kwargs
         if self.error is not None:
             raise self.error
@@ -31,6 +36,7 @@ class FakeLLMClient:
 
 @pytest.fixture(name="session")
 def session_fixture() -> Generator[Session, None, None]:
+    """A fresh in-memory SQLite session, isolated per test."""
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -43,6 +49,9 @@ def session_fixture() -> Generator[Session, None, None]:
 
 @pytest.fixture(name="fake_llm_client")
 def fake_llm_client_fixture() -> FakeLLMClient:
+    """A FakeLLMClient defaulting to an empty task list; tests can override
+    .response/.error before making a request.
+    """
     return FakeLLMClient(response={"tasks": []})
 
 
@@ -52,6 +61,8 @@ def client_fixture(
     fake_llm_client: FakeLLMClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> Generator[TestClient, None, None]:
+    """A TestClient wired to the isolated session and fake LLM client above."""
+
     def get_session_override() -> Generator[Session, None, None]:
         yield session
 

@@ -1,3 +1,9 @@
+"""Task extraction: the prompt, the tool schema, and validation.
+
+The one module under app/ai that actually knows about tasks - everything it
+calls into (structured_output.py, tool_calling.py) is generic.
+"""
+
 from datetime import date, timedelta
 
 from app.ai.schemas import ExtractedTask, ExtractionResult
@@ -41,13 +47,16 @@ TASK_EXTRACTION_SCHEMA: dict = {
 
 
 class ExtractionError(Exception):
-    pass
+    """Raised when extraction fails - either the LLM call or its output shape."""
 
 
 def _next_weekday_reference(today: date) -> str:
-    # One full week (7 days) is not an arbitrary window - it's exactly
-    # enough to cover every "next <weekday>" phrase once, with no gaps or
-    # redundancy, regardless of what today's weekday is.
+    """Render a next-weekday: date lookup table for the next 7 days.
+
+    One full week is not an arbitrary window - it's exactly enough to cover
+    every "next <weekday>" phrase once, with no gaps or redundancy,
+    regardless of what today's weekday is.
+    """
     return "\n".join(
         f"next {(today + timedelta(days=offset)).strftime('%A')}: "
         f"{(today + timedelta(days=offset)).isoformat()}"
@@ -56,6 +65,12 @@ def _next_weekday_reference(today: date) -> str:
 
 
 def _system_prompt(today: date) -> str:
+    """Build the extraction system prompt for a given "today".
+
+    Embeds today's date/weekday and the next-weekday reference table
+    directly, so the model looks up weekdays instead of calculating them -
+    the fix for a real date-resolution bug found in testing (see AI_LOG.md).
+    """
     weekday = today.strftime("%A")
     reference = _next_weekday_reference(today)
     return (
@@ -85,6 +100,11 @@ def _system_prompt(today: date) -> str:
 
 
 def extract_tasks(client: LLMClient, text: str, today: date) -> list[ExtractedTask]:
+    """Propose tasks from freeform text, resolving relative dates against today.
+
+    today is always passed in, never read internally, so this stays
+    deterministic and testable. Raises ExtractionError on any failure.
+    """
     try:
         result = get_structured_output(
             client,
