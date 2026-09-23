@@ -8,8 +8,9 @@ from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from starlette.datastructures import FormData
 
+from app.ai.assistant import AssistantError, ask_assistant
 from app.ai.extract import ExtractionError, extract_tasks
-from app.ai.schemas import ExtractedTask
+from app.ai.schemas import AssistantAnswer, ExtractedTask
 from app.ai.tool_calling import LLMClientDep
 from app.db import SessionDep, create_db_and_tables
 from app.models import TaskCreate, TaskSource, TaskUpdate
@@ -41,9 +42,12 @@ def _page_context(
     editing_id: int | None = None,
     proposals: list[ExtractedTask] | None = None,
     error: str | None = None,
+    assistant_answer: AssistantAnswer | None = None,
+    assistant_error: str | None = None,
 ) -> dict:
     """Context shared by every template response: the current task list,
-    plus whichever row is being edited and/or AI-review state, if any.
+    plus whichever row is being edited, AI-review state, and/or assistant
+    answer state, if any.
     """
     return {
         "request": request,
@@ -51,6 +55,8 @@ def _page_context(
         "editing_id": editing_id,
         "proposals": proposals,
         "error": error,
+        "assistant_answer": assistant_answer,
+        "assistant_error": assistant_error,
     }
 
 
@@ -193,4 +199,38 @@ async def confirm_proposals(request: Request, session: SessionDep):
         create_task(session, data, source=TaskSource.ai)
     return templates.TemplateResponse(
         request, "partials/_app_body.html", _page_context(request, session)
+    )
+
+
+@app.post("/ai/assistant")
+def ask(
+    request: Request,
+    session: SessionDep,
+    client: LLMClientDep,
+    question: Annotated[str, Form(min_length=1)],
+):
+    """Answer a question about the user's tasks, grounded only in the DB.
+
+    Renders the answer (or an explicit "can't answer" reason) on success,
+    or an inline call-failure error - still HTTP 200, same reasoning as
+    /ai/proposals.
+    """
+    assistant_answer: AssistantAnswer | None
+    try:
+        assistant_answer = ask_assistant(
+            client, question, list_tasks(session), today=date.today()
+        )
+        assistant_error = None
+    except AssistantError as exc:
+        assistant_answer = None
+        assistant_error = str(exc)
+    return templates.TemplateResponse(
+        request,
+        "partials/_assistant_answer.html",
+        _page_context(
+            request,
+            session,
+            assistant_answer=assistant_answer,
+            assistant_error=assistant_error,
+        ),
     )

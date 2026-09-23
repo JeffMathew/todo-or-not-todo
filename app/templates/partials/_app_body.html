@@ -8,6 +8,14 @@
   </div>
 </article>
 
+<article class="card-gap">
+  <header><strong>Ask about your tasks</strong></header>
+  {% include "partials/_assistant_form.html" %}
+  <div id="assistant-answer">
+    {% include "partials/_assistant_answer.html" %}
+  </div>
+</article>
+
 <article>
   <header><strong>Your tasks</strong></header>
   {% include "partials/_task_form.html" %}

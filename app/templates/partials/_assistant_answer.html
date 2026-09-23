@@ -1,0 +1,9 @@
+{% if assistant_error %}
+<p style="color: var(--pico-del-color);">{{ assistant_error }}</p>
+{% elif assistant_answer %}
+  {% if assistant_answer.can_answer %}
+<p>{{ assistant_answer.answer }}</p>
+  {% else %}
+<p style="color: var(--pico-muted-color);">I'm not sure - {{ assistant_answer.reason }}</p>
+  {% endif %}
+{% endif %}
