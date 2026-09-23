@@ -1,0 +1,11 @@
+<form hx-post="/assistant/ask" hx-target="#assistant-answer" hx-swap="innerHTML">
+  <label for="assistant-question">Ask a question about your tasks</label>
+  <textarea
+    id="assistant-question"
+    name="question"
+    rows="2"
+    placeholder="e.g. What's overdue? How many tasks are high priority?"
+    required
+  ></textarea>
+  <button type="submit">Ask</button>
+</form>
