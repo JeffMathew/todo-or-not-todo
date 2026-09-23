@@ -202,7 +202,7 @@ async def confirm_proposals(request: Request, session: SessionDep):
     )
 
 
-@app.post("/assistant/ask")
+@app.post("/ai/assistant")
 def ask(
     request: Request,
     session: SessionDep,
